@@ -10,12 +10,12 @@ import datetime
 import pandas as pd
 import numpy as np
 
-import cortex.raw as raw
-import cortex.primary as primary
-import cortex.secondary as secondary
-from cortex.feature_types import all_features, log
+import cortex2.raw2 as raw
+import cortex2.primary2 as primary
+import cortex2.secondary2 as secondary
+from cortex2.feature_types2 import all_features, log
 
-from cortex.utils.useful_functions import generate_ids, shift_time
+from cortex2.utils.useful_functions import generate_ids, shift_time
 
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG,
                     format="[%(levelname)s:%(module)s:%(funcName)s] %(message)s")
@@ -31,7 +31,7 @@ MS_PER_DAY = 86400000 # (1000 ms * 60 sec * 60 min * 24 hr * 1 day)
 
 
 
-def run(id_or_set, features=[], feature_params={}, start=None, end=None,
+def run2(id_or_set, features=[], feature_params={}, start=None, end=None,
         resolution=MS_PER_DAY, path_to_save="", run_part_and_feats="",
         cache=False, print_logs=False):
     """ Function to get features from cortex.

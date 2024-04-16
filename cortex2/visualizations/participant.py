@@ -6,7 +6,7 @@ import LAMP
 import pandas as pd
 import altair as alt
 from ..utils.useful_functions import generate_ids,set_graph,shift_time
-from ..run import run
+from ..run2 import run2
 
 MS_PER_HOUR = 1000*60*60
 

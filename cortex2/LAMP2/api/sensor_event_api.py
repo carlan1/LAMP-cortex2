@@ -121,12 +121,16 @@ class SensorEventApi(object):
             kwargs['participant_id'] = \
                 participant_id
             
-            res = self.call_with_http_info(**kwargs)
-            if s3_client is None or len(res['data']) > 0:
-                return res
+            res_db = self.call_with_http_info(**kwargs)
+            if s3_client is None:
+                return res_db
             else:
                 log.info("No data found in main database. Searching the archive...")
-                return get_archive_data(participant_id, s3_client=s3_client, **kwargs)
+                
+                res_archive = get_archive_data(participant_id, s3_client=s3_client, **kwargs)
+                res_db['data'] += res_archive['data']
+                
+                return res_db
         
         def get_archive_data(part, s3_client, bucket_name='lamp.archive', **kwargs):
             objects = []

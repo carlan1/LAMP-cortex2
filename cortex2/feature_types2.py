@@ -783,14 +783,14 @@ def secondary_feature(name, dependencies):
             data = sorted(data,key=lambda x: x['timestamp']) if data else []
             _event = {'timestamp': kwgs['start'],
                       'duration': kwgs['end'] - kwgs['start'],
-                      'resolution':kwgs['resolution'],
+                      'resolution': kwgs['resolution'],
                       'data': data}
 
             return _event
         # When we register/save the function, make sure we save the decorated
         # and not the RAW function.
         _wrapper2.__name__ = func.__name__
-        __features__.append({ 'name': name,
+        __features__.append({'name': name,
                              'type': 'secondary',
                              'dependencies': dependencies,
                              'callable': _wrapper2 })
