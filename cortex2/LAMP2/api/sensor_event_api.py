@@ -128,9 +128,11 @@ class SensorEventApi(object):
                 log.info("No data found in main database. Searching the archive...")
                 
                 res_archive = get_archive_data(participant_id, s3_client=s3_client, **kwargs)
-                res_db['data'] += res_archive['data']
+                print(f"Length of archive data: {len(res_archive['data'])}")
+                print(f"Length of prod data: {len(res_db['data'])}")
+                res = {"data": res_db['data'] + res_archive['data']}
                 
-                return res_db
+                return res
         
         def get_archive_data(part, s3_client, bucket_name='lamp.archive', **kwargs):
             objects = []
@@ -144,9 +146,11 @@ class SensorEventApi(object):
                 sensors_prefix = f'sensor_event_string_4/_parent={part}/'
                 sensors_page = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=sensors_prefix, Delimiter='/')
                 # Extract the sensor names from the CommonPrefixes part of the response
-                origins = [cp['Prefix'].split('/')[-2] for cp in sensors_page.get('CommonPrefixes', [])]
-
+                origins = [cp['Prefix'].split('/')[-2].split('=')[1] for cp in sensors_page.get('CommonPrefixes', [])]
+                
+            has_data = 0
             for origin in origins:
+                print(origin)
                 prefix = f'sensor_event_string_4/_parent={part}/sensor={origin}/'
 
                 # Create a paginator for the list_objects_v2 operation
@@ -162,11 +166,15 @@ class SensorEventApi(object):
                 for file in objects:
                     res = s3_client.get_object(Bucket=bucket_name, Key=file)
                     contents = pd.read_parquet(io.BytesIO(res['Body'].read())).drop(columns=["_id"])
-                    df = pd.concat([df, contents], ignore_index=True)
+                    if not has_data:
+                        df = contents
+                        has_data = 1
+                    else:
+                        df = pd.concat([df, contents], ignore_index=True)
 
-            if df.empty:
+            if not has_data or df.empty:
                 return {"data": []}
-
+            
             df['ts'] = df['timestamp'].apply(lambda x: int(float(x.split("E")[0]) * 10 ** int(x.split("E")[1])))
             df['data_json'] = df['data'].apply(lambda x: json.loads(x))
             df['sensor'] = origin
